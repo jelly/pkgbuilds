@@ -4,25 +4,25 @@
 
 pkgname=zarafa-webapp
 pkgver=1.5
-pkgrel=43477
+pkgrel=1
+_svnver=43477
 pkgdesc="WebApp for Zarafa"
 arch=('any')
 url="http://www.zarafa.com/"
 license=('AGPL3')
 makedepends=('apache-ant')
-depends=('zarafa-server'
-	'php')
-source=("webapp-${pkgver}.tar.gz::http://download.zarafa.com/community/final/WebApp/${pkgver}/webapp-${pkgver}.svn${pkgrel}.tar.gz")
+depends=('php')
+source=("webapp-${_svnver}.tar.gz::http://download.zarafa.com/community/final/WebApp/${pkgver}/webapp-${pkgver}.svn${_svnver}.tar.gz")
 md5sums=('554f7baa087ce948f12c6898ee3c4611')
 
 build() {
-  cd ${srcdir}/webapp-${pkgver}.svn${pkgrel}
+  cd ${srcdir}/webapp-${pkgver}.svn${_svnver}
   ant deploy
   ant deploy-plugins
 }
 
 package() {
-  cd ${srcdir}/webapp-${pkgver}.svn${pkgrel}/deploy
+  cd ${srcdir}/webapp-${pkgver}.svn${_svnver}/deploy
 
   install -d ${pkgdir}/usr/share/zarafa-webapp/
 
