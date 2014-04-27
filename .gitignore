@@ -1,3 +1,5 @@
 *.log
 *.tar.gz
 *.tar.xz
+*.diff
+*.tar.bz2
