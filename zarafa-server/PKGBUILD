@@ -12,6 +12,7 @@ license=('AGPL3')
 depends=('libical>=0.44' 'mysql' 'curl' 'libxml2' 'openssl' 'openldap' 'krb5'
 	 'boost>=1.52.0' 'bison' 'python2' 'swig' 'kyotocabinet' 'zarafa-libvmime')
 makedepends=('php>=5.2.0' 'e2fsprogs' 'openldap' 'automake')
+optdepends=('php: for webaccess')
 install=${pkgname}.install
 backup=('etc/zarafa/server.cfg'
 	'etc/zarafa/dagent.cfg'
@@ -66,7 +67,7 @@ package() {
   install -m 755 -o root -g root -d ${pkgdir}/var/log/zarafa
   install -m 755 -o root -g root -d ${pkgdir}/var/lib/zarafa
 
-  # move /var/lib to the right place
+  # move /var/lib to the right place related to https://jira.zarafa.com/browse/ZCP-12249
   mv  $pkgdir/usr/var/lib/zarafa/* $pkgdir/var/lib/zarafa/
   rm -rf $pkgdir/usr/var
 
@@ -77,7 +78,7 @@ package() {
   install -m 755 $srcdir/zarafa-dagent.service ${pkgdir}/usr/lib/systemd/system
   install -m 755 $srcdir/zarafa-gateway.service ${pkgdir}/usr/lib/systemd/system
 
-  # Remove unused /usr/etc
+  # Remove unused /usr/etc related to https://jira.zarafa.com/browse/ZCP-12249
   rm -rf $pkgdir/usr/etc
 
   # copy example configs to their active locations
