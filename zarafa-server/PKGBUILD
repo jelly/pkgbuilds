@@ -54,8 +54,6 @@ build() {
   sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.in
   sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.am
 
-  # make/g++ doesnt pick up -luuid properly without this... even though configure
-  # finds it, and -luuid is present in the actual command that fails...
   make
 }
 
@@ -67,6 +65,8 @@ package() {
   # Finalize
   install -m 755 -o root -g root -d ${pkgdir}/var/log/zarafa
   install -m 755 -o root -g root -d ${pkgdir}/var/lib/zarafa
+
+  # move /var/lib to the right place
   mv  $pkgdir/usr/var/lib/zarafa/* $pkgdir/var/lib/zarafa/
   rm -rf $pkgdir/usr/var
 
