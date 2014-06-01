@@ -3,3 +3,5 @@
 *.tar.xz
 *.diff
 *.tar.bz2
+*.1
+*.2
