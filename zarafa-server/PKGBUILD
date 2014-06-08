@@ -1,41 +1,42 @@
 # Maintainer: Jelle van der Waa <jelle@vdwaa.nl>
 # Contributor: Archist archist@die-optimisten.net
 # Contributor: C Anthony Risinger
-
-pkgname=zarafa-server
-pkgver=7.1.9
-pkgrel=44333
+pkgname=('zarafa-server' 'zarafa-webaccess')
+pkgver=7.1.10
+_pkgrel=44973
+pkgrel=2
 pkgdesc="Open Source Groupware Solution"
 arch=('x86_64 i686')
 url="http://www.zarafa.com/"
 license=('AGPL3')
-depends=('libical>=0.44' 'mysql' 'curl' 'libxml2' 'openssl' 'openldap' 'krb5'
-	 'boost>=1.52.0' 'bison' 'python2' 'swig' 'kyotocabinet' 'zarafa-libvmime')
-makedepends=('php>=5.2.0' 'e2fsprogs' 'openldap' 'automake')
+makedepends=('php>=5.2.0' 'e2fsprogs' 'openldap' 'automake' 'swig' 'zarafa-libvmime' 'mysql')
 optdepends=('php: for webaccess')
 install=${pkgname}.install
-backup=('etc/zarafa/server.cfg'
-	'etc/zarafa/dagent.cfg'
-	'etc/zarafa/gateway.cfg'
-	'etc/zarafa/monitor.cfg'
-	'etc/zarafa/spooler.cfg'
-	'etc/zarafa/ical.cfg')
-source=("zarafa-${pkgver}.tar.gz::http://download.zarafa.com/community/final/7.1/${pkgver}-${pkgrel}/sourcecode/zcp-${pkgver}.tar.gz"
+source=("zarafa-${pkgver}.tar.gz::http://download.zarafa.com/community/final/7.1/${pkgver}-${_pkgrel}/sourcecode/zcp-${pkgver}.tar.gz"
 	"zarafa-server.service"
 	"zarafa-ical.service"
         "zarafa-gateway.service"
         "zarafa-spooler.service"
         "zarafa-dagent.service"
-        "zarafa-7.1.8-man-pages.patch"
-	"mariadb.patch")
+        "zarafa-7.1.8-man-pages.patch")
+
+prepare() {
+  cd ${srcdir}/zarafa-${pkgver}
+  # https://jira.zarafa.com/browse/ZCP-12211
+  patch -p1 -i ${srcdir}/zarafa-7.1.8-man-pages.patch
+
+  # Fix python shebang
+  sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.in
+  sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.am
+
+  # Disable search, doesn't compile due to a boost error
+  cd ${srcdir}/zarafa-${pkgver}/ECtools/
+  sed -i 's/zarafa-search//g' Makefile.in
+  sed -i 's/zarafa-search//g' Makefile.am
+}
 
 build() {
   cd ${srcdir}/zarafa-${pkgver}
-  # https://jira.zarafa.com/browse/ZCP-11934 
-  patch -p1 -i ${srcdir}/mariadb.patch
-
-  # https://jira.zarafa.com/browse/ZCP-12211
-  patch -p1 -i ${srcdir}/zarafa-7.1.8-man-pages.patch
 
   msg "Starting build..."
   CPPFLAGS=-I/usr/include/python2.7 ./configure --prefix=/usr \
@@ -45,21 +46,26 @@ build() {
     --enable-swig \
     --with-python=/usr/bin/python2 \
     --disable-debug \
-    --disable-testtools \
     --disable-static \
     --with-userscript-prefix=/etc/zarafa/userscripts \
     --with-quotatemplate-prefix=/etc/zarafa/quotamails \
-    --with-sysconfdir=/etc
-
-  # Fix python shebang
-  sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.in
-  sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.am
+    --with-searchscripts-prefix=/etc/zarafa/searchscripts
 
   make
 }
 
 
-package() {
+package_zarafa-server() {
+  pkgdesc="Open Source Groupware Solution"
+  depends=('libical>=0.44' 'mysql' 'curl' 'libxml2' 'openssl' 'openldap' 'krb5'
+	 'boost>=1.52.0' 'bison' 'python2' 'swig' 'kyotocabinet' 'zarafa-libvmime' 'libmariadbclient')
+  backup=('etc/zarafa/server.cfg'
+	'etc/zarafa/dagent.cfg'
+	'etc/zarafa/gateway.cfg'
+	'etc/zarafa/monitor.cfg'
+	'etc/zarafa/spooler.cfg'
+	'etc/zarafa/ical.cfg')
+
   cd ${srcdir}/zarafa-${pkgver}
 
   make DESTDIR=${pkgdir} install
@@ -68,9 +74,10 @@ package() {
   install -m 755 -o root -g root -d ${pkgdir}/var/lib/zarafa
 
   # move /var/lib to the right place related to https://jira.zarafa.com/browse/ZCP-12249
-  mv  $pkgdir/usr/var/lib/zarafa/* $pkgdir/var/lib/zarafa/
-  rm -rf $pkgdir/usr/var
+  #mv  $pkgdir/usr/var/lib/zarafa/* $pkgdir/var/lib/zarafa/
+  #rm -rf $pkgdir/usr/var
 
+  # Systemd files
   install -d  ${pkgdir}/usr/lib/systemd/system
   install -m 755 $srcdir/zarafa-server.service ${pkgdir}/usr/lib/systemd/system
   install -m 755 $srcdir/zarafa-ical.service ${pkgdir}/usr/lib/systemd/system
@@ -79,12 +86,17 @@ package() {
   install -m 755 $srcdir/zarafa-gateway.service ${pkgdir}/usr/lib/systemd/system
 
   # Remove unused /usr/etc related to https://jira.zarafa.com/browse/ZCP-12249
-  rm -rf $pkgdir/usr/etc
+  #rm -rf $pkgdir/usr/etc
 
   # copy example configs to their active locations
   for cfg in ${pkgdir}/usr/share/doc/zarafa/example-config/*.cfg; do
     install -m 755 -o root -g root -D ${cfg} ${pkgdir}/etc/zarafa
   done
+}
+
+package_zarafa-webaccess() {
+  pkgdesc="Webaccess client for the Zarafa Open Source Groupware Solution"
+  depends=('zarafa-server')
 
   # Webaccess
   install -d ${pkgdir}/etc/httpd/conf/extra/
@@ -93,13 +105,12 @@ package() {
 
   cp -r ${srcdir}/zarafa-${pkgver}/php-webclient-ajax/* ${pkgdir}/usr/share/zarafa-webaccess/
   mv ${pkgdir}/usr/share/zarafa-webaccess/config.php.dist ${pkgdir}/usr/share/zarafa-webaccess/config.php
-  #sed -i 's$/usr/share/php/$/usr/share/pear/$' ${pkgdir}/usr/share/zarafa-webaccess/config.php
 }
-md5sums=('2d74bcca184e4c245fb06ef7db4ec0d8'
+
+md5sums=('179be643cbc195668a12fc64fd655a22'
          '0e2728f1e35b25ca679427fcb57315d8'
          'c25f3982217fe390d68ed9003a5988ed'
          '705ada3a8c4b904696e0c461c131b4f7'
          '846b76e5cb0239a488c81e11d74ad08b'
          '9666bf713645af11dd65b3ac5cbb42d9'
-         'bebbef5a19a94bc2742bca726c739074'
-         '1241edb4eac987b81a0700447eea1781')
+         'bebbef5a19a94bc2742bca726c739074')
