@@ -1,0 +1,13 @@
+[Unit]
+Description=zarafa-monitor - Zarafa Quota Manager
+Wants=zarafa-server.service
+After=zarafa-server.service
+
+[Service]
+Type=forking
+GuessMainPID=no
+Environment=LC_ALL=C LANG=C
+ExecStart=/usr/bin/zarafa-monitor 
+
+[Install]
+WantedBy=multi-user.target
