@@ -52,6 +52,7 @@ build() {
     --enable-swig \
     --with-python=/usr/bin/python2 \
     --disable-debug \
+    --enable-unicode \
     --disable-static \
     --with-userscript-prefix=/etc/zarafa/userscripts \
     --with-quotatemplate-prefix=/etc/zarafa/quotamails \
