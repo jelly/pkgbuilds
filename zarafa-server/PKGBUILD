@@ -21,9 +21,16 @@ source=("zarafa-${pkgver}.tar.gz::http://download.zarafa.com/community/beta/7.2/
         "zarafa-spooler.service"
         "zarafa-dagent.service")
 
+md5sums=('ba460374f6678ba8c6412ad93b7a8181'
+         '0e2728f1e35b25ca679427fcb57315d8'
+         'c25f3982217fe390d68ed9003a5988ed'
+         '705ada3a8c4b904696e0c461c131b4f7'
+         '846b76e5cb0239a488c81e11d74ad08b'
+         '9666bf713645af11dd65b3ac5cbb42d9')
+
 prepare() {
   cd ${srcdir}/zarafa-${_pkgver}
-  # Fix python shebang
+  # Fix python shebang. TODO: in the future will be fixed with --with-python=/usr/bin/python2
   sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.in
   sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.am
   sed -i 's/python setup.py/python2 setup.py/' swig/python/zarafa/Makefile.am
@@ -36,12 +43,16 @@ build() {
   cd ${srcdir}/zarafa-${_pkgver}
 
   msg "Starting build..."
-  CPPFLAGS=-I/usr/include/python2.7 ./configure --prefix=/usr \
+  CPPFLAGS=-I/usr/include/python2.7 ./configure \
+    --prefix=/usr \
+    --localstatedir=/var \
+    --sysconfdir=/etc \
     --enable-python \
     --enable-swig \
     --with-python=/usr/bin/python2 \
     --disable-debug \
     --enable-unicode \
+    --enable-release \
     --disable-static \
     --with-userscript-prefix=/etc/zarafa/userscripts \
     --with-quotatemplate-prefix=/etc/zarafa/quotamails \
@@ -49,7 +60,6 @@ build() {
 
   make
 }
-
 
 package_zarafa-server() {
   pkgdesc="Open Source Groupware Solution"
@@ -69,10 +79,6 @@ package_zarafa-server() {
   install -m 755 -o root -g root -d ${pkgdir}/var/log/zarafa
   install -m 755 -o root -g root -d ${pkgdir}/var/lib/zarafa
 
-  # move /var/lib to the right place related to https://jira.zarafa.com/browse/ZCP-12249
-  #mv  $pkgdir/usr/var/lib/zarafa/* $pkgdir/var/lib/zarafa/
-  #rm -rf $pkgdir/usr/var
-
   # Systemd files
   install -d  ${pkgdir}/usr/lib/systemd/system
   install -m 755 $srcdir/zarafa-server.service ${pkgdir}/usr/lib/systemd/system
@@ -81,13 +87,16 @@ package_zarafa-server() {
   install -m 755 $srcdir/zarafa-dagent.service ${pkgdir}/usr/lib/systemd/system
   install -m 755 $srcdir/zarafa-gateway.service ${pkgdir}/usr/lib/systemd/system
 
-  # Remove unused /usr/etc related to https://jira.zarafa.com/browse/ZCP-12249
-  #rm -rf $pkgdir/usr/etc
-
   # copy example configs to their active locations
   for cfg in ${pkgdir}/usr/share/doc/zarafa/example-config/*.cfg; do
     install -m 755 -o root -g root -D ${cfg} ${pkgdir}/etc/zarafa
   done
+
+  # Remove sysvinit support
+  rm -fr $pkgdir/etc/init.d/
+}
+
+package_php_mapi() {
 }
 
 package_zarafa-webaccess() {
@@ -102,9 +111,3 @@ package_zarafa-webaccess() {
   cp -r ${srcdir}/zarafa-${_pkgver}/php-webclient-ajax/* ${pkgdir}/usr/share/zarafa-webaccess/
   mv ${pkgdir}/usr/share/zarafa-webaccess/config.php.dist ${pkgdir}/usr/share/zarafa-webaccess/config.php
 }
-md5sums=('ba460374f6678ba8c6412ad93b7a8181'
-         '0e2728f1e35b25ca679427fcb57315d8'
-         'c25f3982217fe390d68ed9003a5988ed'
-         '705ada3a8c4b904696e0c461c131b4f7'
-         '846b76e5cb0239a488c81e11d74ad08b'
-         '9666bf713645af11dd65b3ac5cbb42d9')
