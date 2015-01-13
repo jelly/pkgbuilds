@@ -64,7 +64,7 @@ build() {
 package_zarafa-server() {
   pkgdesc="Open Source Groupware Solution"
   depends=('libical>=0.44' 'mysql' 'curl' 'libxml2' 'openssl' 'openldap' 'krb5' 'libical'
-	 'boost-libs' 'bison' 'python2' 'swig' 'kyotocabinet' 'zarafa-libvmime' 'libmariadbclient')
+	 'boost-libs' 'bison' 'python2' 'swig' 'zarafa-libvmime' 'libmariadbclient')
   backup=('etc/zarafa/server.cfg'
 	'etc/zarafa/dagent.cfg'
 	'etc/zarafa/gateway.cfg'
