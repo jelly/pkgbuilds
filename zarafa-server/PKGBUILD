@@ -7,11 +7,11 @@ _pkgver=7.2.0
 _pkgrel=47004
 pkgrel=1
 pkgdesc="Open Source Groupware Solution"
-arch=('x86_64 i686')
+arch=('x86_64' 'i686')
 url="http://www.zarafa.com/"
 license=('AGPL3')
 # TODO: add python-kyotocabinet for new search
-makedepends=('libical' 'php>=5.2.0' 'e2fsprogs' 'openldap' 'automake' 'swig' 'zarafa-libvmime' 'mysql' 'python2' 'boost' 'boost-libs')
+makedepends=('libical' 'php>=5.2.0' 'e2fsprogs' 'openldap' 'automake' 'swig' 'zarafa-libvmime' 'mysql' 'python2' 'boost' 'boost-libs' 'gsoap')
 optdepends=('php: for webaccess')
 install=${pkgname}.install
 source=("zarafa-${pkgver}.tar.gz::http://download.zarafa.com/community/beta/7.2/${pkgver}-${_pkgrel}/sourcecode/zarafa-${_pkgver}.tar.gz"
@@ -64,7 +64,7 @@ build() {
 package_zarafa-server() {
   pkgdesc="Open Source Groupware Solution"
   depends=('libical>=0.44' 'mysql' 'curl' 'libxml2' 'openssl' 'openldap' 'krb5' 'libical'
-	 'boost>=1.52.0' 'bison' 'python2' 'swig' 'kyotocabinet' 'zarafa-libvmime' 'libmariadbclient')
+	 'boost-libs' 'bison' 'python2' 'swig' 'kyotocabinet' 'zarafa-libvmime' 'libmariadbclient')
   backup=('etc/zarafa/server.cfg'
 	'etc/zarafa/dagent.cfg'
 	'etc/zarafa/gateway.cfg'
@@ -94,9 +94,6 @@ package_zarafa-server() {
 
   # Remove sysvinit support
   rm -fr $pkgdir/etc/init.d/
-}
-
-package_php_mapi() {
 }
 
 package_zarafa-webaccess() {
