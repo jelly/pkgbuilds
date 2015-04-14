@@ -2,11 +2,11 @@
 # Contributor: Archist archist@die-optimisten.net
 # Contributor: C Anthony Risinger
 pkgname=('zarafa-server' 'zarafa-webaccess')
-pkgver=7.1.11
-_pkgrel=46050
+pkgver=7.1.12
+_pkgrel=48726
 pkgrel=1
 pkgdesc="Open Source Groupware Solution"
-arch=('x86_64 i686')
+arch=('x86_64' 'i686')
 url="http://www.zarafa.com/"
 license=('AGPL3')
 makedepends=('libical' 'php>=5.2.0' 'e2fsprogs' 'openldap' 'automake' 'swig' 'zarafa-libvmime' 'mysql' 'python2' 'kyotocabinet' 'clucene' 'boost' 'boost-libs')
@@ -28,19 +28,11 @@ md5sums=('a07da0f67f85d2a888d8778ca6d3c203'
 
 prepare() {
   cd ${srcdir}/zarafa-${pkgver}
-  # Fix python shebang
-  sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.in
-  sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.am
 
   # Disable search, doesn't compile due to a boost error
   cd ${srcdir}/zarafa-${pkgver}/ECtools/
   sed -i 's/zarafa-search//g' Makefile.in
   sed -i 's/zarafa-search//g' Makefile.am
-
-
-  # Fix boost, doesn't seem to work though
-  #sed -i 's/\# Boost/BOOST_CPPFLAGS="$BOOST_CPPFLAGS -DBOOST_NO_CXX11_RVALUE_REFERENCES"/g' configure.ac
-  
 }
 
 build() {
@@ -65,7 +57,8 @@ build() {
 package_zarafa-server() {
   pkgdesc="Open Source Groupware Solution"
   depends=('libical>=0.44' 'mysql' 'curl' 'libxml2' 'openssl' 'openldap' 'krb5' 'libical'
-	 'boost>=1.52.0' 'bison' 'python2' 'swig' 'kyotocabinet' 'zarafa-libvmime' 'libmariadbclient')
+	 'boost>=1.52.0' 'bison' 'python2' 'kyotocabinet' 'zarafa-libvmime' 'libmariadbclient')
+  optdepends=('openldap: ldap backend')
   backup=('etc/zarafa/server.cfg'
 	'etc/zarafa/dagent.cfg'
 	'etc/zarafa/gateway.cfg'
