@@ -1,10 +1,11 @@
 # Maintainer: Jelle van der Waa <jelle@vdwaa.nl>
 # Contributor: Archist archist@die-optimisten.net
 # Contributor: C Anthony Risinger
+
+# TODO: Split some more?
 pkgname=('zarafa-server' 'zarafa-webaccess')
-pkgver=7.2.0beta1
-_pkgver=7.2.0
-_pkgrel=47004
+pkgver=7.2.0
+_pkgrel=48204
 pkgrel=1
 pkgdesc="Open Source Groupware Solution"
 arch=('x86_64' 'i686')
@@ -14,33 +15,22 @@ license=('AGPL3')
 makedepends=('libical' 'php>=5.2.0' 'e2fsprogs' 'openldap' 'automake' 'swig' 'zarafa-libvmime' 'mysql' 'python2' 'boost' 'boost-libs' 'gsoap')
 optdepends=('php: for webaccess')
 install=${pkgname}.install
-source=("zarafa-${pkgver}.tar.gz::http://download.zarafa.com/community/beta/7.2/${pkgver}-${_pkgrel}/sourcecode/zarafa-${_pkgver}.tar.gz"
+source=("zarafa-${pkgver}.tar.gz::http://download.zarafa.com/community/final/7.2/${pkgver}-${_pkgrel}/sourcecode/zarafa-${pkgver}.tar.gz"
 	"zarafa-server.service"
 	"zarafa-ical.service"
         "zarafa-gateway.service"
         "zarafa-spooler.service"
         "zarafa-dagent.service")
 
-md5sums=('ba460374f6678ba8c6412ad93b7a8181'
+md5sums=('7dc8a526b3eb83e6eb5bbc9d2215b501'
          '0e2728f1e35b25ca679427fcb57315d8'
          'c25f3982217fe390d68ed9003a5988ed'
          '705ada3a8c4b904696e0c461c131b4f7'
          '846b76e5cb0239a488c81e11d74ad08b'
          '9666bf713645af11dd65b3ac5cbb42d9')
 
-prepare() {
-  cd ${srcdir}/zarafa-${_pkgver}
-  # Fix python shebang. TODO: in the future will be fixed with --with-python=/usr/bin/python2
-  sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.in
-  sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.am
-  sed -i 's/python setup.py/python2 setup.py/' swig/python/zarafa/Makefile.am
-  sed -i 's/python setup.py/python2 setup.py/' swig/python/zarafa/Makefile.in
-  sed -i 's/python setup.py/python2 setup.py/' ECtools/zarafa-search/Makefile.am
-  sed -i 's/python setup.py/python2 setup.py/' ECtools/zarafa-search/Makefile.in
-}
-
 build() {
-  cd ${srcdir}/zarafa-${_pkgver}
+  cd ${srcdir}/zarafa-${pkgver}
 
   msg "Starting build..."
   CPPFLAGS=-I/usr/include/python2.7 ./configure \
@@ -63,8 +53,9 @@ build() {
 
 package_zarafa-server() {
   pkgdesc="Open Source Groupware Solution"
-  depends=('libical>=0.44' 'mysql' 'curl' 'libxml2' 'openssl' 'openldap' 'krb5' 'libical'
-	 'boost-libs' 'bison' 'python2' 'swig' 'zarafa-libvmime' 'libmariadbclient')
+  depends=('libical>=0.44' 'mysql' 'curl' 'libxml2' 'openssl'  'krb5' 'libical'
+	 'boost-libs' 'bison' 'python2' 'zarafa-libvmime' 'libmariadbclient')
+  optdepends=('openldap: ')
   backup=('etc/zarafa/server.cfg'
 	'etc/zarafa/dagent.cfg'
 	'etc/zarafa/gateway.cfg'
@@ -72,7 +63,7 @@ package_zarafa-server() {
 	'etc/zarafa/spooler.cfg'
 	'etc/zarafa/ical.cfg')
 
-  cd ${srcdir}/zarafa-${_pkgver}
+  cd ${srcdir}/zarafa-${pkgver}
 
   make DESTDIR=${pkgdir} install
   # Finalize
@@ -102,9 +93,9 @@ package_zarafa-webaccess() {
 
   # Webaccess
   install -d ${pkgdir}/etc/httpd/conf/extra/
-  install -m 755 ${srcdir}/zarafa-${_pkgver}/php-webclient-ajax/zarafa-webaccess.conf ${pkgdir}/etc/httpd/conf/extra/zarafa-webaccess.conf
+  install -m 755 ${srcdir}/zarafa-${pkgver}/php-webclient-ajax/zarafa-webaccess.conf ${pkgdir}/etc/httpd/conf/extra/zarafa-webaccess.conf
   install -m 755 -d ${pkgdir}/usr/share/zarafa-webaccess/
 
-  cp -r ${srcdir}/zarafa-${_pkgver}/php-webclient-ajax/* ${pkgdir}/usr/share/zarafa-webaccess/
+  cp -r ${srcdir}/zarafa-${pkgver}/php-webclient-ajax/* ${pkgdir}/usr/share/zarafa-webaccess/
   mv ${pkgdir}/usr/share/zarafa-webaccess/config.php.dist ${pkgdir}/usr/share/zarafa-webaccess/config.php
 }
