@@ -17,17 +17,24 @@ source=("zarafa-${pkgver}.tar.gz::http://download.zarafa.com/community/final/7.1
 	"zarafa-ical.service"
         "zarafa-gateway.service"
         "zarafa-spooler.service"
-        "zarafa-dagent.service")
+        "zarafa-dagent.service"
+        "zarafa-7.1.12-licensed-archiver.patch")
 
-md5sums=('a07da0f67f85d2a888d8778ca6d3c203'
+md5sums=('98ceed8b35a68bba669aecccbc7b1f43'
          '0e2728f1e35b25ca679427fcb57315d8'
          'c25f3982217fe390d68ed9003a5988ed'
          '705ada3a8c4b904696e0c461c131b4f7'
          '846b76e5cb0239a488c81e11d74ad08b'
-         '9666bf713645af11dd65b3ac5cbb42d9')
+         '9666bf713645af11dd65b3ac5cbb42d9'
+         '36b88a6b61b3e40eb9e133fd0e59d80e')
 
 prepare() {
   cd ${srcdir}/zarafa-${pkgver}
+
+  sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.in
+  sed -i 's/python setup.py/python2 setup.py/' swig/python/Makefile.am
+
+  patch -Np1 -i $srcdir/zarafa-7.1.12-licensed-archiver.patch
 
   # Disable search, doesn't compile due to a boost error
   cd ${srcdir}/zarafa-${pkgver}/ECtools/
