@@ -1,0 +1,35 @@
+# Maintainer: Jelle van der Waa <jelle@vdwaa.nl>
+
+pkgname=bandit
+pkgver=0.11.0
+pkgrel=1
+pkgdesc="A Python security linter"
+license=("APL")
+url="https://wiki.openstack.org/wiki/Security/Projects/Bandit"
+depends=('python2' 'python2-yaml')
+makedepends=('python2-setuptools' 'python2-pip' 'git')
+checkdepends=('python2-tox')
+arch=('any')
+options=(!emptydirs)
+conflicts=('bandit-git')
+source=("git://git.openstack.org/stackforge/bandit#tag=0.11.0")
+md5sums=('SKIP')
+
+build() {
+  cd 'bandit'
+  python2 setup.py build
+}
+
+package() {
+  cd 'bandit'
+  python2 setup.py install --optimize=1 --root=${pkgdir}
+
+
+  install -Dm 644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+
+check(){
+  cd 'bandit'
+
+  tox2 -e cover
+}
